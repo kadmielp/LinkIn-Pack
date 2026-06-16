@@ -30,6 +30,21 @@ Project managers and team leads can use this to prepare a clean bookmark file fo
 
 The goal is to give people one organized import with the tools they need on day one: CRM, project boards, design files, docs, reports, and internal processes.
 
+```mermaid
+flowchart LR
+    subgraph Lead["Project Manager / Team Lead"]
+        A[Curate Team URLs] --> B[Organize by Workflow]
+        B --> C[Export HTML]
+        C --> D[Share with New Joiners]
+    end
+
+    subgraph Joiner["New Joiner"]
+        E[Import into Browser]
+    end
+
+    D --> E
+```
+
 Example:
 
 ```text
@@ -59,25 +74,6 @@ Project Team Bookmarks
     +-- OKRs
     +-- Status reports
 ```
-
-Workflow:
-
-```mermaid
-flowchart LR
-    subgraph Lead["Project Manager / Team Lead"]
-        A[Curate Team URLs] --> B[Organize by Workflow]
-        B --> C[Export HTML]
-        C --> D[Share with New Joiners]
-    end
-
-    subgraph Joiner["New Joiner"]
-        E[Import into Browser]
-    end
-
-    D --> E
-```
-
-
 
 ## Browser Support
 
