@@ -480,7 +480,8 @@
     }
 
     .item-row:hover {
-      background: #fbfdfe;
+      background: #eef9fb;
+      box-shadow: inset 3px 0 0 #72cdd6;
     }
 
     .item-row.selected {
@@ -503,12 +504,21 @@
     }
 
     .item-row.folder-row:hover {
-      background: #f1fbfc;
+      background: #eaf8fa;
+    }
+
+    .item-row:hover .item-title {
+      color: #043e47;
+    }
+
+    .item-row:hover .item-url {
+      color: #0f6570;
     }
 
     .item-row:has(.item-actions button:last-child:hover),
     .item-row:has(.item-actions button:last-child:focus-visible) {
-      background: var(--accent-soft);
+      background: #e4f6f8;
+      box-shadow: inset 3px 0 0 #72cdd6;
     }
 
     .item-main {
