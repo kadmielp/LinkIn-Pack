@@ -171,6 +171,80 @@
       justify-content: flex-end;
     }
 
+    .export-help {
+      background: #eaf6f8;
+      border-bottom: 1px solid #c8e6ec;
+      padding: 12px 20px;
+    }
+
+    .export-help details {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .export-help summary {
+      cursor: pointer;
+      color: #123f4a;
+      font-weight: 720;
+      line-height: 1.35;
+    }
+
+    .export-help summary::marker {
+      color: var(--accent);
+    }
+
+    .export-help p {
+      margin: 8px 0 0;
+      color: #31515b;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .browser-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .browser-guide {
+      background: #fff;
+      border: 1px solid #c8e6ec;
+      border-radius: 8px;
+      padding: 12px;
+      min-width: 0;
+    }
+
+    .browser-guide h3 {
+      margin: 0 0 7px;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    .browser-guide ol {
+      margin: 0;
+      padding-left: 18px;
+      color: #344054;
+      font-size: 13px;
+      line-height: 1.42;
+    }
+
+    .browser-guide a,
+    .browser-guide code {
+      overflow-wrap: anywhere;
+    }
+
+    .browser-guide code {
+      display: inline-block;
+      margin-top: 6px;
+      color: #123f4a;
+      background: #f1fbfd;
+      border: 1px solid #d3edf2;
+      border-radius: 6px;
+      padding: 2px 5px;
+      font-size: 12px;
+    }
+
     .file-input {
       display: none;
     }
@@ -450,6 +524,10 @@
         justify-content: flex-start;
       }
 
+      .browser-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
       main,
       .editor-grid {
         grid-template-columns: 1fr;
@@ -498,6 +576,10 @@
       .row {
         grid-template-columns: 1fr;
       }
+
+      .browser-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -520,6 +602,67 @@
         <button id="exportBtn" type="button" disabled>Export HTML</button>
       </div>
     </header>
+
+    <section class="export-help" aria-label="How to export bookmarks from your browser">
+      <details>
+        <summary>How to export bookmarks from your browser</summary>
+        <p>Export bookmarks as an HTML file, then open that file here. Browser internal links may need to be copied into the address bar if your browser blocks direct navigation from this page.</p>
+        <div class="browser-grid">
+          <article class="browser-guide">
+            <h3>Chrome</h3>
+            <ol>
+              <li>Open <a href="chrome://bookmarks/">chrome://bookmarks/</a> or press Ctrl+Shift+O.</li>
+              <li>Open the three-dot menu.</li>
+              <li>Choose Export bookmarks.</li>
+            </ol>
+            <code>chrome://bookmarks/</code>
+          </article>
+          <article class="browser-guide">
+            <h3>Edge</h3>
+            <ol>
+              <li>Open <a href="edge://favorites/">edge://favorites/</a> or press Ctrl+Shift+O.</li>
+              <li>Open the three-dot menu.</li>
+              <li>Choose Export favorites.</li>
+            </ol>
+            <code>edge://favorites/</code>
+          </article>
+          <article class="browser-guide">
+            <h3>Firefox</h3>
+            <ol>
+              <li>Press Ctrl+Shift+O to open Library.</li>
+              <li>Choose Import and Backup.</li>
+              <li>Choose Export Bookmarks to HTML.</li>
+            </ol>
+          </article>
+          <article class="browser-guide">
+            <h3>Brave</h3>
+            <ol>
+              <li>Open <a href="brave://bookmarks/">brave://bookmarks/</a> or press Ctrl+Shift+O.</li>
+              <li>Open the three-dot menu.</li>
+              <li>Choose Export bookmarks.</li>
+            </ol>
+            <code>brave://bookmarks/</code>
+          </article>
+          <article class="browser-guide">
+            <h3>Opera</h3>
+            <ol>
+              <li>Open <a href="opera://bookmarks/">opera://bookmarks/</a> or press Ctrl+Shift+B.</li>
+              <li>Open the bookmark manager menu.</li>
+              <li>Choose Export bookmarks.</li>
+            </ol>
+            <code>opera://bookmarks/</code>
+          </article>
+          <article class="browser-guide">
+            <h3>Safari</h3>
+            <ol>
+              <li>Open Safari.</li>
+              <li>Choose File, then Export.</li>
+              <li>Choose Bookmarks.</li>
+            </ol>
+          </article>
+        </div>
+      </details>
+    </section>
 
     <main>
       <section class="panel sidebar" aria-label="Bookmark folders">
