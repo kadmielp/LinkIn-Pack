@@ -525,6 +525,9 @@
 
     .content-title {
       min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .content-title h2 {
@@ -1053,8 +1056,13 @@
       <section class="panel content" aria-label="Bookmark editor">
         <div class="content-head">
           <div class="content-title">
-            <h2 id="currentTitle">No file loaded</h2>
-            <p id="currentMeta">Chrome, Edge, Firefox, Brave, Comet, and most browsers export compatible bookmark HTML.</p>
+            <button id="backBtn" class="icon" type="button" title="Go up to parent folder" aria-label="Go up to parent folder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+            </button>
+            <div style="min-width: 0;">
+              <h2 id="currentTitle">No file loaded</h2>
+              <p id="currentMeta">Chrome, Edge, Firefox, Brave, Comet, and most browsers export compatible bookmark HTML.</p>
+            </div>
           </div>
           <div class="inline-controls">
             <button id="sortBtn" type="button" disabled>Sort folder</button>
@@ -1115,6 +1123,7 @@
     const state = {
       root: null,
       selectedId: null,
+      currentFolderId: null,
       sourceName: 'bookmarks.html',
       dirty: false
     };
@@ -1146,7 +1155,8 @@
       detailModified: document.getElementById('detailModified'),
       moveSelect: document.getElementById('moveSelect'),
       saveDetailsBtn: document.getElementById('saveDetailsBtn'),
-      toast: document.getElementById('toast')
+      toast: document.getElementById('toast'),
+      backBtn: document.getElementById('backBtn')
     };
 
     const icons = {
@@ -1281,9 +1291,8 @@
     }
 
     function childrenOfSelectedFolder() {
-      const selected = getSelected();
-      if (!selected) return [];
-      return selected.node.type === 'folder' ? selected.node.children : (selected.parent?.children || []);
+      const currentFolder = flatten().find((entry) => entry.node.id === state.currentFolderId)?.node;
+      return currentFolder ? currentFolder.children : [];
     }
 
     function selectNode(id) {
@@ -1342,7 +1351,11 @@
       row.innerHTML = `${icons.folder}<span class="label"></span><span class="meta"></span>`;
       row.querySelector('.label').textContent = node.title || '(untitled)';
       row.querySelector('.meta').textContent = node.children.length;
-      row.addEventListener('click', () => selectNode(node.id));
+      row.addEventListener('click', () => {
+        state.selectedId = node.id;
+        state.currentFolderId = node.id;
+        render();
+      });
       li.appendChild(row);
 
       const visibleChildren = node.children
@@ -1369,7 +1382,14 @@
     function renderItems() {
       const selected = getSelected();
       if (!selected) return;
-      const folder = selected.node.type === 'folder' ? selected.node : selected.parent;
+
+      const hasParent = state.root && state.currentFolderId !== state.root.id;
+      els.backBtn.style.display = hasParent ? 'inline-grid' : 'none';
+
+      const currentFolderEntry = flatten().find((entry) => entry.node.id === state.currentFolderId);
+      const currentFolder = currentFolderEntry ? currentFolderEntry.node : null;
+      if (!currentFolder) return;
+
       const filter = els.searchInput.value.trim().toLowerCase();
       const searchRows = filter
         ? flatten()
@@ -1382,10 +1402,10 @@
         : null;
       const rows = searchRows || childrenOfSelectedFolder();
 
-      els.currentTitle.textContent = filter ? 'Search results' : (selected.node.title || '(untitled)');
+      els.currentTitle.textContent = filter ? 'Search results' : (currentFolder.title || '(untitled)');
       els.currentMeta.textContent = filter
         ? `${rows.length} ${rows.length === 1 ? 'match' : 'matches'} for "${els.searchInput.value.trim()}"`
-        : (folder ? `${folder.title} contains ${folder.children.length} items` : 'Root bookmark folder');
+        : `${currentFolder.title} contains ${currentFolder.children.length} items`;
 
       if (!rows.length) {
         els.items.innerHTML = '';
@@ -1442,10 +1462,10 @@
         buttons[0].disabled = Boolean(filter) || index === 0;
         buttons[1].disabled = Boolean(filter) || index === rows.length - 1;
         buttons[0].addEventListener('click', () => {
-          if (!filter) moveWithinFolder(folder, index, index - 1);
+          if (!filter) moveWithinFolder(currentFolder, index, index - 1);
         });
         buttons[1].addEventListener('click', () => {
-          if (!filter) moveWithinFolder(folder, index, index + 1);
+          if (!filter) moveWithinFolder(currentFolder, index, index + 1);
         });
         buttons[2].addEventListener('click', () => selectNode(node.id));
         row.addEventListener('click', (event) => {
@@ -1454,7 +1474,12 @@
         });
         row.addEventListener('dblclick', (event) => {
           if (event.target.closest('button')) return;
-          if (node.type === 'folder') selectNode(node.id);
+          if (node.type === 'folder') {
+            state.currentFolderId = node.id;
+            state.selectedId = node.id;
+            els.searchInput.value = '';
+            render();
+          }
         });
         els.items.appendChild(row);
       });
@@ -1563,9 +1588,8 @@
     }
 
     function addNode(type) {
-      const selected = getSelected();
-      if (!selected) return;
-      const folder = selected.node.type === 'folder' ? selected.node : selected.parent;
+      const folder = flatten().find((entry) => entry.node.id === state.currentFolderId)?.node;
+      if (!folder) return;
       const node = createNode(type, type === 'folder' ? 'New folder' : 'New bookmark', {
         url: type === 'bookmark' ? 'https://' : ''
       });
@@ -1583,15 +1607,17 @@
       if (!confirm(`Delete "${label}"?`)) return;
       selected.parent.children = selected.parent.children.filter((child) => child.id !== selected.node.id);
       selected.parent.lastModified = Math.floor(Date.now() / 1000);
+      if (state.selectedId === state.currentFolderId) {
+        state.currentFolderId = selected.parent.id;
+      }
       state.selectedId = selected.parent.id;
       markDirty();
       showToast('Item deleted.');
     }
 
     function sortSelectedFolder() {
-      const selected = getSelected();
-      if (!selected) return;
-      const folder = selected.node.type === 'folder' ? selected.node : selected.parent;
+      const folder = flatten().find((entry) => entry.node.id === state.currentFolderId)?.node;
+      if (!folder) return;
       folder.children.sort((a, b) => {
         if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
         return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
@@ -1678,6 +1704,7 @@ ${node.children.map((child) => serializeNode(child, depth + 1)).join('')}${inden
       state.root = parseBookmarkHtml(html);
       state.sourceName = sourceName || 'bookmarks.html';
       state.selectedId = state.root.id;
+      state.currentFolderId = state.root.id;
       state.dirty = false;
       render();
       showToast('Bookmark file loaded.');
@@ -1745,6 +1772,15 @@ ${node.children.map((child) => serializeNode(child, depth + 1)).join('')}${inden
     els.deleteBtn.addEventListener('click', deleteSelected);
     els.sortBtn.addEventListener('click', sortSelectedFolder);
     els.detailsForm.addEventListener('submit', saveDetails);
+    els.backBtn.addEventListener('click', () => {
+      els.searchInput.value = '';
+      const selected = flatten().find((entry) => entry.node.id === state.currentFolderId);
+      if (selected && selected.parent) {
+        state.currentFolderId = selected.parent.id;
+        state.selectedId = selected.parent.id;
+        render();
+      }
+    });
 
     window.addEventListener('beforeunload', (event) => {
       if (!state.dirty) return;
