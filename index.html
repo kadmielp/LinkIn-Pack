@@ -533,12 +533,30 @@
     }
 
     .item-url {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      display: block;
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 8px;
       margin-top: 0;
       color: var(--muted);
       font-size: 13px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      text-align: left;
+      cursor: pointer;
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .item-url:hover,
+    .item-url:focus-visible {
+      background: #dff4f7;
+      color: #064f59;
+      box-shadow: inset 0 0 0 1px #9fdce3;
+      outline: none;
     }
 
     .item-actions {
@@ -1216,7 +1234,7 @@
           <div class="item-main">
             <div class="item-title"></div>
           </div>
-          <div class="item-url"></div>
+          <button class="item-url" type="button"></button>
           <div class="item-actions">
             <button class="icon" type="button" title="Move up" aria-label="Move up">${icons.up}</button>
             <button class="icon" type="button" title="Move down" aria-label="Move down">${icons.down}</button>
@@ -1224,8 +1242,12 @@
           </div>
         `;
         row.querySelector('.item-title').textContent = node.title || '(untitled)';
-        row.querySelector('.item-url').textContent = node.type === 'folder' ? `${node.children.length} items` : node.url;
-        const buttons = row.querySelectorAll('button');
+        const urlTarget = row.querySelector('.item-url');
+        urlTarget.textContent = node.type === 'folder' ? `${node.children.length} items` : node.url;
+        urlTarget.title = node.type === 'folder' ? 'Select folder' : `Select bookmark URL: ${node.url}`;
+        urlTarget.setAttribute('aria-label', node.type === 'folder' ? `Select folder ${node.title || '(untitled)'}` : `Select bookmark URL ${node.url}`);
+        urlTarget.addEventListener('click', () => selectNode(node.id));
+        const buttons = row.querySelector('.item-actions').querySelectorAll('button');
         buttons[0].disabled = Boolean(filter) || index === 0;
         buttons[1].disabled = Boolean(filter) || index === rows.length - 1;
         buttons[0].addEventListener('click', () => {
