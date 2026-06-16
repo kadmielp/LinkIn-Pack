@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/logo.png" alt="LinkIn Pack Logo" width="120" />
+  <img src="public/logo.png" alt="LinkIn Pack Logo" width="500" />
 </p>
 
 # LinkIn Pack
