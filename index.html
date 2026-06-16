@@ -1074,29 +1074,36 @@
       const filter = els.searchInput.value.trim().toLowerCase();
       els.tree.innerHTML = '';
       const list = document.createElement('ul');
-      list.appendChild(renderTreeNode(state.root, filter));
+      const rootNode = renderTreeNode(state.root, filter);
+      if (rootNode) list.appendChild(rootNode);
       els.tree.appendChild(list);
     }
 
     function renderTreeNode(node, filter) {
+      if (node.type !== 'folder') return null;
+      if (filter && !matchesFilter(node, filter)) return null;
+
       const li = document.createElement('li');
       const row = document.createElement('button');
       row.type = 'button';
       row.className = `tree-row${node.id === state.selectedId ? ' selected' : ''}`;
-      row.innerHTML = `${node.type === 'folder' ? icons.folder : icons.link}<span class="label"></span><span class="meta"></span>`;
+      row.innerHTML = `${icons.folder}<span class="label"></span><span class="meta"></span>`;
       row.querySelector('.label').textContent = node.title || '(untitled)';
-      row.querySelector('.meta').textContent = node.type === 'folder' ? node.children.length : '';
+      row.querySelector('.meta').textContent = node.children.length;
       row.addEventListener('click', () => selectNode(node.id));
       li.appendChild(row);
 
-      if (node.type === 'folder') {
-        const matchingChildren = node.children.filter((child) => matchesFilter(child, filter));
-        const visibleChildren = filter ? matchingChildren : node.children;
-        if (visibleChildren.length) {
-          const ul = document.createElement('ul');
-          for (const child of visibleChildren) ul.appendChild(renderTreeNode(child, filter));
-          li.appendChild(ul);
+      const visibleChildren = node.children
+        .filter((child) => child.type === 'folder')
+        .filter((child) => !filter || matchesFilter(child, filter));
+
+      if (visibleChildren.length) {
+        const ul = document.createElement('ul');
+        for (const child of visibleChildren) {
+          const childNode = renderTreeNode(child, filter);
+          if (childNode) ul.appendChild(childNode);
         }
+        li.appendChild(ul);
       }
       return li;
     }
@@ -1111,14 +1118,27 @@
       const selected = getSelected();
       if (!selected) return;
       const folder = selected.node.type === 'folder' ? selected.node : selected.parent;
-      const rows = childrenOfSelectedFolder();
-      els.currentTitle.textContent = selected.node.title || '(untitled)';
-      els.currentMeta.textContent = folder
-        ? `${folder.title} contains ${folder.children.length} items`
-        : 'Root bookmark folder';
+      const filter = els.searchInput.value.trim().toLowerCase();
+      const searchRows = filter
+        ? flatten()
+          .filter((entry) => entry.node.id !== state.root.id)
+          .filter((entry) => {
+            const haystack = `${entry.node.title} ${entry.node.url || ''}`.toLowerCase();
+            return haystack.includes(filter);
+          })
+          .map((entry) => entry.node)
+        : null;
+      const rows = searchRows || childrenOfSelectedFolder();
+
+      els.currentTitle.textContent = filter ? 'Search results' : (selected.node.title || '(untitled)');
+      els.currentMeta.textContent = filter
+        ? `${rows.length} ${rows.length === 1 ? 'match' : 'matches'} for "${els.searchInput.value.trim()}"`
+        : (folder ? `${folder.title} contains ${folder.children.length} items` : 'Root bookmark folder');
 
       if (!rows.length) {
-        els.items.innerHTML = '<div class="empty"><div><strong>This folder is empty</strong><span>Add a bookmark or folder to start organizing.</span></div></div>';
+        els.items.innerHTML = filter
+          ? '<div class="empty"><div><strong>No matches found</strong><span>Try another title, URL, or folder name.</span></div></div>'
+          : '<div class="empty"><div><strong>This folder is empty</strong><span>Add a bookmark or folder to start organizing.</span></div></div>';
         return;
       }
 
@@ -1145,10 +1165,14 @@
         row.querySelector('.item-title').textContent = node.title || '(untitled)';
         row.querySelector('.item-url').textContent = node.type === 'folder' ? `${node.children.length} items` : node.url;
         const buttons = row.querySelectorAll('button');
-        buttons[0].disabled = index === 0;
-        buttons[1].disabled = index === rows.length - 1;
-        buttons[0].addEventListener('click', () => moveWithinFolder(folder, index, index - 1));
-        buttons[1].addEventListener('click', () => moveWithinFolder(folder, index, index + 1));
+        buttons[0].disabled = Boolean(filter) || index === 0;
+        buttons[1].disabled = Boolean(filter) || index === rows.length - 1;
+        buttons[0].addEventListener('click', () => {
+          if (!filter) moveWithinFolder(folder, index, index - 1);
+        });
+        buttons[1].addEventListener('click', () => {
+          if (!filter) moveWithinFolder(folder, index, index + 1);
+        });
         buttons[2].addEventListener('click', () => selectNode(node.id));
         els.items.appendChild(row);
       });
