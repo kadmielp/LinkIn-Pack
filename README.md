@@ -1,6 +1,6 @@
-# Bookmark File Editor
+# LinKit
 
-Single-file HTML app for editing browser bookmark export files.
+Organize, edit, and export browser bookmarks locally with zero installation. Perfect for curating onboarding resources for new team members.
 
 - No install
 - No build step
