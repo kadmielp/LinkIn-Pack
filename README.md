@@ -79,18 +79,3 @@ Project Team Bookmarks
 
 The app reads and writes the standard Netscape bookmark HTML format used by most browsers.
 
-## Development
-
-Edit `index.html` directly.
-
-Optional local preview:
-
-```bash
-python -m http.server 4173 --bind 127.0.0.1
-```
-
-Open:
-
-```text
-http://127.0.0.1:4173/index.html
-```
