@@ -1447,12 +1447,13 @@
         row.dataset.nodeType = node.type;
 
         let actionsHtml = `
-          <button class="icon" type="button" title="Move up" aria-label="Move up">${icons.up}</button>
-          <button class="icon" type="button" title="Move down" aria-label="Move down">${icons.down}</button>
+          <button class="icon move-up-btn" type="button" title="Move up" aria-label="Move up">${icons.up}</button>
+          <button class="icon move-down-btn" type="button" title="Move down" aria-label="Move down">${icons.down}</button>
         `;
         if (node.type === 'bookmark') {
-          actionsHtml += `<button class="icon" type="button" title="Open URL in new tab" aria-label="Open URL in new tab">${icons.external}</button>`;
+          actionsHtml += `<button class="icon open-url-btn" type="button" title="Open URL in new tab" aria-label="Open URL in new tab">${icons.external}</button>`;
         }
+        actionsHtml += `<button class="icon danger delete-btn" type="button" title="Delete item" aria-label="Delete item">${icons.trash}</button>`;
 
         row.innerHTML = `
           <div aria-hidden="true">${node.type === 'folder' ? icons.folder : icons.link}</div>
@@ -1469,19 +1470,32 @@
         urlTarget.textContent = node.type === 'folder' ? `${node.children.length} items` : node.url;
         urlTarget.title = node.type === 'folder' ? 'Select folder' : `Select bookmark URL: ${node.url}`;
         urlTarget.setAttribute('aria-label', node.type === 'folder' ? `Select folder ${node.title || '(untitled)'}` : `Select bookmark URL ${node.url}`);
-        const buttons = row.querySelector('.item-actions').querySelectorAll('button');
-        buttons[0].disabled = Boolean(filter) || index === 0;
-        buttons[1].disabled = Boolean(filter) || index === rows.length - 1;
-        buttons[0].addEventListener('click', () => {
+        
+        const moveUpBtn = row.querySelector('.move-up-btn');
+        const moveDownBtn = row.querySelector('.move-down-btn');
+        const openUrlBtn = row.querySelector('.open-url-btn');
+        const deleteBtn = row.querySelector('.delete-btn');
+
+        moveUpBtn.disabled = Boolean(filter) || index === 0;
+        moveDownBtn.disabled = Boolean(filter) || index === rows.length - 1;
+        moveUpBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
           if (!filter) moveWithinFolder(currentFolder, index, index - 1);
         });
-        buttons[1].addEventListener('click', () => {
+        moveDownBtn.addEventListener('click', (event) => {
+          event.stopPropagation();
           if (!filter) moveWithinFolder(currentFolder, index, index + 1);
         });
-        if (node.type === 'bookmark') {
-          buttons[2].addEventListener('click', (event) => {
+        if (openUrlBtn) {
+          openUrlBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             window.open(node.url, '_blank', 'noopener,noreferrer');
+          });
+        }
+        if (deleteBtn) {
+          deleteBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteNodeById(node.id);
           });
         }
         row.addEventListener('click', (event) => {
@@ -1616,19 +1630,28 @@
       showToast(`${type === 'folder' ? 'Folder' : 'Bookmark'} added.`);
     }
 
-    function deleteSelected() {
-      const selected = getSelected();
+    function deleteNodeById(id) {
+      const selected = flatten().find((entry) => entry.node.id === id);
       if (!selected || selected.node.id === state.root.id || !selected.parent) return;
       const label = selected.node.title || 'selected item';
       if (!confirm(`Delete "${label}"?`)) return;
       selected.parent.children = selected.parent.children.filter((child) => child.id !== selected.node.id);
       selected.parent.lastModified = Math.floor(Date.now() / 1000);
-      if (state.selectedId === state.currentFolderId) {
+      if (state.selectedId === id) {
+        state.selectedId = selected.parent.id;
+      }
+      if (state.currentFolderId === id) {
         state.currentFolderId = selected.parent.id;
       }
-      state.selectedId = selected.parent.id;
       markDirty();
       showToast('Item deleted.');
+    }
+
+    function deleteSelected() {
+      const selected = getSelected();
+      if (selected) {
+        deleteNodeById(selected.node.id);
+      }
     }
 
     function sortSelectedFolder() {
