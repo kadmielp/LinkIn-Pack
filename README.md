@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/logo.png" alt="LinkIn Pack Logo" width="120" />
+</p>
+
 # LinkIn Pack
 
 Organize, edit, and export browser bookmarks locally with zero installation. Perfect for curating onboarding resources for new team members.
