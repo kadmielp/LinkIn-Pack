@@ -848,6 +848,47 @@
       stroke-width: 2;
     }
 
+    /* Drag and Drop Visual Feedback */
+    .item-row[draggable="true"] {
+      user-select: none;
+    }
+    .item-row.dragging {
+      opacity: 0.4;
+      background: var(--panel-2);
+      border-style: dashed;
+    }
+    .item-row.drag-inside {
+      background-color: var(--accent-soft) !important;
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+    .item-row.drag-before::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--accent);
+      z-index: 10;
+    }
+    .item-row.drag-after::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background-color: var(--accent);
+      z-index: 10;
+    }
+
+    .tree-row.drag-inside {
+      background: var(--accent-soft) !important;
+      border-color: var(--accent) !important;
+      outline: 2px dashed var(--accent);
+    }
+
     @media (max-width: 900px) {
       header {
         align-items: flex-start;
@@ -1128,7 +1169,8 @@
       selectedId: null,
       currentFolderId: null,
       sourceName: 'bookmarks.html',
-      dirty: false
+      dirty: false,
+      draggingId: null
     };
 
     const els = {
@@ -1362,6 +1404,50 @@
         state.currentFolderId = node.id;
         render();
       });
+
+      // Drag and Drop support
+      row.draggable = true;
+      row.addEventListener('dragstart', (event) => {
+        state.draggingId = node.id;
+        row.classList.add('dragging');
+        event.dataTransfer.setData('text/plain', node.id);
+        event.dataTransfer.effectAllowed = 'move';
+      });
+
+      row.addEventListener('dragend', () => {
+        state.draggingId = null;
+        row.classList.remove('dragging');
+        document.querySelectorAll('.drag-inside, .drag-before, .drag-after, .dragging').forEach((el) => {
+          el.classList.remove('drag-inside', 'drag-before', 'drag-after', 'dragging');
+        });
+      });
+
+      row.addEventListener('dragover', (event) => {
+        if (!state.draggingId || state.draggingId === node.id) return;
+
+        const flat = flatten();
+        const draggedNode = flat.find((e) => e.node.id === state.draggingId)?.node;
+        if (draggedNode && draggedNode.type === 'folder' && (node.id === draggedNode.id || isDescendant(node, draggedNode))) {
+          return;
+        }
+
+        event.preventDefault();
+        row.classList.add('drag-inside');
+      });
+
+      row.addEventListener('dragleave', () => {
+        row.classList.remove('drag-inside');
+      });
+
+      row.addEventListener('drop', (event) => {
+        event.preventDefault();
+        row.classList.remove('drag-inside');
+        if (state.draggingId) {
+          moveNode(state.draggingId, node.id, 'inside');
+          render();
+        }
+      });
+
       li.appendChild(row);
 
       const visibleChildren = node.children
@@ -1505,6 +1591,90 @@
             render();
           }
         });
+
+        // Drag and Drop support
+        row.draggable = true;
+
+        row.addEventListener('dragstart', (event) => {
+          state.draggingId = node.id;
+          row.classList.add('dragging');
+          event.dataTransfer.setData('text/plain', node.id);
+          event.dataTransfer.effectAllowed = 'move';
+        });
+
+        row.addEventListener('dragend', () => {
+          state.draggingId = null;
+          row.classList.remove('dragging');
+          document.querySelectorAll('.drag-inside, .drag-before, .drag-after, .dragging').forEach((el) => {
+            el.classList.remove('drag-inside', 'drag-before', 'drag-after', 'dragging');
+          });
+        });
+
+        row.addEventListener('dragover', (event) => {
+          if (!state.draggingId || state.draggingId === node.id) return;
+
+          // Prevent cycles
+          const flat = flatten();
+          const draggedNode = flat.find((e) => e.node.id === state.draggingId)?.node;
+          if (draggedNode && draggedNode.type === 'folder') {
+            if (node.id === draggedNode.id || isDescendant(node, draggedNode)) {
+              return;
+            }
+          }
+
+          const rect = row.getBoundingClientRect();
+          const relativeY = (event.clientY - rect.top) / rect.height;
+
+          row.classList.remove('drag-inside', 'drag-before', 'drag-after');
+
+          if (node.type === 'folder') {
+            if (relativeY > 0.25 && relativeY < 0.75) {
+              row.classList.add('drag-inside');
+              event.preventDefault();
+            } else if (!filter) {
+              if (relativeY <= 0.25) {
+                row.classList.add('drag-before');
+              } else {
+                row.classList.add('drag-after');
+              }
+              event.preventDefault();
+            }
+          } else if (!filter) {
+            if (relativeY <= 0.5) {
+              row.classList.add('drag-before');
+            } else {
+              row.classList.add('drag-after');
+            }
+            event.preventDefault();
+          }
+        });
+
+        row.addEventListener('dragleave', () => {
+          row.classList.remove('drag-inside', 'drag-before', 'drag-after');
+        });
+
+        row.addEventListener('drop', (event) => {
+          event.preventDefault();
+          row.classList.remove('drag-inside', 'drag-before', 'drag-after');
+
+          if (!state.draggingId || state.draggingId === node.id) return;
+
+          const rect = row.getBoundingClientRect();
+          const relativeY = (event.clientY - rect.top) / rect.height;
+
+          let position = null;
+          if (node.type === 'folder' && relativeY > 0.25 && relativeY < 0.75) {
+            position = 'inside';
+          } else if (!filter) {
+            position = relativeY <= 0.5 ? 'before' : 'after';
+          }
+
+          if (position) {
+            moveNode(state.draggingId, node.id, position);
+            render();
+          }
+        });
+
         els.items.appendChild(row);
       });
     }
@@ -1585,6 +1755,71 @@
       const [item] = folder.children.splice(from, 1);
       folder.children.splice(to, 0, item);
       folder.lastModified = Math.floor(Date.now() / 1000);
+      markDirty();
+    }
+
+    function moveNode(draggedId, targetId, position) {
+      if (draggedId === targetId) return;
+
+      const flat = flatten();
+      const draggedEntry = flat.find((e) => e.node.id === draggedId);
+      const targetEntry = flat.find((e) => e.node.id === targetId);
+
+      if (!draggedEntry || !targetEntry) return;
+
+      const draggedNode = draggedEntry.node;
+      const draggedParent = draggedEntry.parent;
+      const targetNode = targetEntry.node;
+
+      // Prevent moving root node or items without a parent
+      if (draggedNode.id === state.root.id || !draggedParent) return;
+
+      // Prevent moving a folder into itself or its descendants
+      if (draggedNode.type === 'folder') {
+        if (targetNode.id === draggedNode.id || isDescendant(targetNode, draggedNode)) {
+          showToast('Cannot move a folder inside itself or its children.');
+          return;
+        }
+      }
+
+      if (position === 'inside') {
+        if (targetNode.type !== 'folder') return;
+
+        // Remove from current parent
+        draggedParent.children = draggedParent.children.filter((c) => c.id !== draggedId);
+        // Add to target folder
+        targetNode.children.push(draggedNode);
+        targetNode.lastModified = Math.floor(Date.now() / 1000);
+      } else {
+        // Drop before or after a target node
+        const targetParent = targetEntry.parent;
+        if (!targetParent) return; // Cannot drop before/after root
+
+        // Ensure we aren't dropping before/after inside a descendant
+        if (draggedNode.type === 'folder' && isDescendant(targetParent, draggedNode)) {
+          showToast('Cannot move a folder inside itself or its children.');
+          return;
+        }
+
+        const targetIndex = targetParent.children.findIndex((c) => c.id === targetId);
+        if (targetIndex === -1) return;
+
+        // Remove from current parent
+        draggedParent.children = draggedParent.children.filter((c) => c.id !== draggedId);
+
+        let insertIndex;
+        if (draggedParent.id === targetParent.id) {
+          const newTargetIndex = targetParent.children.findIndex((c) => c.id === targetId);
+          insertIndex = position === 'before' ? newTargetIndex : newTargetIndex + 1;
+        } else {
+          insertIndex = position === 'before' ? targetIndex : targetIndex + 1;
+        }
+
+        targetParent.children.splice(insertIndex, 0, draggedNode);
+        targetParent.lastModified = Math.floor(Date.now() / 1000);
+      }
+
+      draggedParent.lastModified = Math.floor(Date.now() / 1000);
       markDirty();
     }
 
