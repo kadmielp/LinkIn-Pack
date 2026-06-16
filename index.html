@@ -381,9 +381,11 @@
     }
 
     .tree-row.selected {
-      background: var(--accent-soft);
-      border-color: #b5e4ea;
-      color: #063f47;
+      background: #d8f3f6;
+      border-color: #63c8d2;
+      color: #043e47;
+      box-shadow: inset 4px 0 0 var(--accent), 0 8px 20px rgba(0, 136, 148, 0.08);
+      font-weight: 760;
     }
 
     .tree-row .label {
@@ -479,6 +481,29 @@
 
     .item-row:hover {
       background: #fbfdfe;
+    }
+
+    .item-row.selected {
+      background: #e3f8fa;
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+
+    .item-row.selected .item-title {
+      color: #043e47;
+      font-weight: 780;
+    }
+
+    .item-row.selected .item-url {
+      color: #006b74;
+      font-weight: 620;
+    }
+
+    .item-row.folder-row {
+      cursor: pointer;
+    }
+
+    .item-row.folder-row:hover {
+      background: #f1fbfc;
     }
 
     .item-row:has(.item-actions button:last-child:hover),
@@ -1149,7 +1174,9 @@
       els.items.appendChild(header);
       rows.forEach((node, index) => {
         const row = document.createElement('div');
-        row.className = 'item-row';
+        row.className = `item-row${node.id === state.selectedId ? ' selected' : ''}${node.type === 'folder' ? ' folder-row' : ''}`;
+        row.dataset.nodeId = node.id;
+        row.dataset.nodeType = node.type;
         row.innerHTML = `
           <div aria-hidden="true">${node.type === 'folder' ? icons.folder : icons.link}</div>
           <div class="item-main">
@@ -1174,6 +1201,10 @@
           if (!filter) moveWithinFolder(folder, index, index + 1);
         });
         buttons[2].addEventListener('click', () => selectNode(node.id));
+        row.addEventListener('dblclick', (event) => {
+          if (event.target.closest('button')) return;
+          if (node.type === 'folder') selectNode(node.id);
+        });
         els.items.appendChild(row);
       });
     }
