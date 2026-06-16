@@ -1066,9 +1066,6 @@
           </div>
           <div class="inline-controls">
             <button id="sortBtn" type="button" disabled>Sort folder</button>
-            <button id="deleteBtn" class="icon danger" type="button" title="Delete selected" aria-label="Delete selected" disabled>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-            </button>
           </div>
         </div>
 
@@ -1111,7 +1108,10 @@
                 Move to folder
                 <select id="moveSelect" disabled></select>
               </label>
-              <button id="saveDetailsBtn" class="primary" type="submit" disabled>Save changes</button>
+              <div class="form-actions" style="display: flex; gap: 10px; margin-top: 18px;">
+                <button id="saveDetailsBtn" class="primary" type="submit" style="flex: 1;" disabled>Save changes</button>
+                <button id="deleteBtn" class="danger" type="button" style="flex: 1;" disabled>Delete</button>
+              </div>
             </form>
           </aside>
         </div>
@@ -1453,7 +1453,6 @@
         if (node.type === 'bookmark') {
           actionsHtml += `<button class="icon open-url-btn" type="button" title="Open URL in new tab" aria-label="Open URL in new tab">${icons.external}</button>`;
         }
-        actionsHtml += `<button class="icon danger delete-btn" type="button" title="Delete item" aria-label="Delete item">${icons.trash}</button>`;
 
         row.innerHTML = `
           <div aria-hidden="true">${node.type === 'folder' ? icons.folder : icons.link}</div>
@@ -1474,7 +1473,6 @@
         const moveUpBtn = row.querySelector('.move-up-btn');
         const moveDownBtn = row.querySelector('.move-down-btn');
         const openUrlBtn = row.querySelector('.open-url-btn');
-        const deleteBtn = row.querySelector('.delete-btn');
 
         moveUpBtn.disabled = Boolean(filter) || index === 0;
         moveDownBtn.disabled = Boolean(filter) || index === rows.length - 1;
@@ -1490,12 +1488,6 @@
           openUrlBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             window.open(node.url, '_blank', 'noopener,noreferrer');
-          });
-        }
-        if (deleteBtn) {
-          deleteBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            deleteNodeById(node.id);
           });
         }
         row.addEventListener('click', (event) => {
@@ -1552,7 +1544,7 @@
       els.detailCreated.value = '';
       els.detailModified.value = '';
       els.moveSelect.innerHTML = '';
-      for (const input of [els.detailTitle, els.detailUrl, els.detailCreated, els.detailModified, els.moveSelect, els.saveDetailsBtn]) {
+      for (const input of [els.detailTitle, els.detailUrl, els.detailCreated, els.detailModified, els.moveSelect, els.saveDetailsBtn, els.deleteBtn]) {
         input.disabled = true;
       }
     }
