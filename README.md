@@ -1,51 +1,77 @@
 # Bookmark File Editor
 
-A simple, dependency-free HTML app for editing bookmark files exported from a browser.
+Single-file HTML app for editing browser bookmark export files.
 
-The app runs entirely in your browser from a single `index.html` file. It does not upload bookmark data anywhere and does not require installation, a build step, or a server.
+- No install
+- No build step
+- No upload
+- Works by opening `index.html` in a browser
 
-## Features
+## What It Does
 
-- Open browser-exported bookmark `.html` / `.htm` files
-- Browse bookmark folders in a tree view
-- Search bookmark titles and URLs
-- Edit bookmark titles, URLs, and dates
-- Rename folders
-- Add folders and bookmarks
-- Move items between folders
-- Reorder items inside a folder
-- Sort a folder alphabetically, with folders first
-- Delete selected bookmarks or folders
-- Export an edited Netscape-compatible bookmark HTML file
+- Open exported bookmark `.html` / `.htm` files
+- Add, edit, move, sort, and delete bookmarks
+- Add and rename folders
+- Search titles and URLs
+- Export a browser-compatible bookmark HTML file
 
-## Usage
+## How To Use
 
-1. Open `index.html` in a web browser.
+1. Open `index.html`.
 2. Click **Open bookmark file**.
-3. Select a bookmark export file from Chrome, Edge, Firefox, Brave, or another browser that exports Netscape bookmark HTML.
-4. Edit, organize, add, delete, or sort bookmarks.
-5. Click **Export HTML** to download the edited bookmark file.
-6. Import the exported file back into your browser if desired.
+3. Choose a bookmark HTML file exported from your browser.
+4. Edit the folders and URLs.
+5. Click **Export HTML**.
+6. Import the new file back into your browser.
 
-## Browser Export Notes
+## Company Onboarding Use Case
 
-Most browsers export bookmarks as an HTML file using the Netscape bookmark format. This app reads and writes that format so the exported file can be imported back into common browsers.
+Companies can use this to prepare a clean bookmark file for new joiners.
 
-## Privacy
+Example:
 
-Bookmark files are processed locally in the browser tab. No network request is required to edit a file when opening `index.html` directly.
+```text
+New Joiner Bookmarks
++-- Start Here
+|   +-- Employee handbook
+|   +-- IT setup guide
+|   +-- Company directory
++-- Daily Tools
+|   +-- Email
+|   +-- Calendar
+|   +-- Chat
+|   +-- Ticket system
++-- Engineering
+|   +-- GitHub
+|   +-- Docs
+|   +-- CI dashboard
++-- HR & Admin
+    +-- Payroll
+    +-- Benefits
+    +-- Time off
+```
+
+Workflow:
+
+```text
+Curate URLs -> Organize folders -> Export HTML -> Share with new joiners -> Import into browser
+```
+
+## Browser Support
+
+The app reads and writes the standard Netscape bookmark HTML format used by most browsers.
 
 ## Development
 
-There is no build pipeline. Edit `index.html` directly and reload the browser.
+Edit `index.html` directly.
 
-For optional local preview during development:
+Optional local preview:
 
 ```bash
 python -m http.server 4173 --bind 127.0.0.1
 ```
 
-Then open:
+Open:
 
 ```text
 http://127.0.0.1:4173/index.html
