@@ -568,13 +568,38 @@
       overflow: auto;
     }
 
+    .details-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
     .details h3 {
-      margin: 0 0 18px;
+      margin: 0;
       font-size: 13px;
       line-height: 1.2;
       color: #344054;
       font-weight: 780;
       text-transform: uppercase;
+    }
+
+    .type-symbol {
+      width: 34px;
+      height: 34px;
+      border: 1px solid #b5e4ea;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: var(--accent-dark);
+      background: #eaf8fa;
+      flex: 0 0 auto;
+    }
+
+    .type-symbol svg {
+      width: 17px;
+      height: 17px;
     }
 
     .form {
@@ -882,12 +907,11 @@
           </div>
 
           <aside class="details" aria-label="Selected item details">
-            <h3>Details</h3>
+            <div class="details-head">
+              <h3>Details</h3>
+              <span id="detailTypeIcon" class="type-symbol" title="No item selected" aria-label="No item selected"></span>
+            </div>
             <form id="detailsForm" class="form">
-              <label>
-                Type
-                <input id="detailType" type="text" disabled value="None">
-              </label>
               <label>
                 Title
                 <input id="detailTitle" type="text" disabled>
@@ -948,7 +972,7 @@
       sortBtn: document.getElementById('sortBtn'),
       deleteBtn: document.getElementById('deleteBtn'),
       detailsForm: document.getElementById('detailsForm'),
-      detailType: document.getElementById('detailType'),
+      detailTypeIcon: document.getElementById('detailTypeIcon'),
       detailTitle: document.getElementById('detailTitle'),
       detailUrl: document.getElementById('detailUrl'),
       detailCreated: document.getElementById('detailCreated'),
@@ -1226,7 +1250,7 @@
         return;
       }
       const node = selected.node;
-      els.detailType.value = node.type === 'folder' ? 'Folder' : 'Bookmark';
+      setDetailTypeIcon(node.type);
       els.detailTitle.value = node.title || '';
       els.detailUrl.value = node.url || '';
       els.detailUrl.disabled = node.type !== 'bookmark';
@@ -1250,7 +1274,7 @@
     }
 
     function clearDetails() {
-      els.detailType.value = 'None';
+      setDetailTypeIcon(null);
       els.detailTitle.value = '';
       els.detailUrl.value = '';
       els.detailCreated.value = '';
@@ -1259,6 +1283,19 @@
       for (const input of [els.detailTitle, els.detailUrl, els.detailCreated, els.detailModified, els.moveSelect, els.saveDetailsBtn]) {
         input.disabled = true;
       }
+    }
+
+    function setDetailTypeIcon(type) {
+      if (!type) {
+        els.detailTypeIcon.innerHTML = '';
+        els.detailTypeIcon.title = 'No item selected';
+        els.detailTypeIcon.setAttribute('aria-label', 'No item selected');
+        return;
+      }
+      const label = type === 'folder' ? 'Folder' : 'Bookmark';
+      els.detailTypeIcon.innerHTML = type === 'folder' ? icons.folder : icons.link;
+      els.detailTypeIcon.title = label;
+      els.detailTypeIcon.setAttribute('aria-label', label);
     }
 
     function isDescendant(candidateFolder, possibleAncestor) {
