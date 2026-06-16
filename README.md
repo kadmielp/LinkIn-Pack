@@ -22,7 +22,7 @@ Organize, edit, and export browser bookmarks locally with zero installation. Per
 ## How To Use
 
 1. Open `index.html`.
-2. Click **Open bookmark file**.
+2. Click **Open bookmark file** (or **Create new** to start from scratch).
 3. Choose a bookmark HTML file exported from your browser.
 4. Edit the folders and URLs.
 5. Click **Export HTML**.
