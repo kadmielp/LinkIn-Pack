@@ -4,6 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bookmark File Editor</title>
+  <script>
+    (() => {
+      try {
+        if (localStorage.getItem('bookmarkEditorTheme') === 'dark') {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      } catch (error) {
+        // Theme persistence is optional; the app still works if storage is blocked.
+      }
+    })();
+  </script>
   <style>
     :root {
       --bg: #f4f7fa;
@@ -26,6 +37,25 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
+    :root[data-theme="dark"] {
+      --bg: #111827;
+      --panel: #18212f;
+      --panel-2: #121a25;
+      --text: #e8eef8;
+      --muted: #94a3b8;
+      --line: #334155;
+      --line-soft: #243244;
+      --accent: #26c6da;
+      --accent-dark: #67e8f9;
+      --accent-soft: #123842;
+      --danger: #ff8a80;
+      --danger-bg: #3f1d20;
+      --ok: #7ddc91;
+      --warn: #f7c948;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.36);
+      color-scheme: dark;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -37,6 +67,12 @@
         linear-gradient(180deg, #ffffff 0, var(--bg) 140px),
         var(--bg);
       color: var(--text);
+    }
+
+    :root[data-theme="dark"] body {
+      background:
+        linear-gradient(180deg, #1d2838 0, var(--bg) 150px),
+        var(--bg);
     }
 
     button,
@@ -65,6 +101,12 @@
       border-color: #a9b8c8;
       background: #f7fafc;
       box-shadow: 0 4px 14px rgba(16, 24, 40, 0.06);
+    }
+
+    :root[data-theme="dark"] button:hover {
+      border-color: #4b6179;
+      background: #223044;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
     }
 
     button.primary {
@@ -111,6 +153,13 @@
       min-width: 0;
       font-size: 14px;
       box-shadow: inset 0 1px 1px rgba(16, 24, 40, 0.03);
+    }
+
+    :root[data-theme="dark"] input,
+    :root[data-theme="dark"] select,
+    :root[data-theme="dark"] textarea {
+      background: #111827;
+      box-shadow: none;
     }
 
     textarea {
@@ -165,6 +214,11 @@
       box-shadow: 0 8px 24px rgba(0, 136, 148, 0.12);
     }
 
+    :root[data-theme="dark"] .brand-mark {
+      background: #0f172a;
+      box-shadow: 0 8px 24px rgba(38, 198, 218, 0.16);
+    }
+
     .brand h1 {
       margin: 0;
       font-size: 20px;
@@ -203,6 +257,10 @@
     .info-button:hover {
       background: #d6eef2;
       border-color: #91ceda;
+    }
+
+    .theme-button {
+      border-radius: 999px;
     }
 
     .modal {
@@ -287,6 +345,41 @@
       border-radius: 6px;
       padding: 2px 5px;
       font-size: 12px;
+    }
+
+    :root[data-theme="dark"] .info-button,
+    :root[data-theme="dark"] .browser-guide,
+    :root[data-theme="dark"] .toolbar,
+    :root[data-theme="dark"] .content,
+    :root[data-theme="dark"] .content-head,
+    :root[data-theme="dark"] .items,
+    :root[data-theme="dark"] .empty {
+      background: var(--panel);
+    }
+
+    :root[data-theme="dark"] .modal,
+    :root[data-theme="dark"] .details,
+    :root[data-theme="dark"] .sidebar {
+      background: var(--panel-2);
+      color: var(--text);
+    }
+
+    :root[data-theme="dark"] .modal-body p,
+    :root[data-theme="dark"] .browser-guide ol,
+    :root[data-theme="dark"] label,
+    :root[data-theme="dark"] .details h3,
+    :root[data-theme="dark"] .list-header {
+      color: var(--muted);
+    }
+
+    :root[data-theme="dark"] .browser-guide,
+    :root[data-theme="dark"] .browser-guide code {
+      border-color: var(--line);
+    }
+
+    :root[data-theme="dark"] .browser-guide code {
+      color: var(--accent-dark);
+      background: #0f2630;
     }
 
     .file-input {
@@ -388,6 +481,17 @@
       font-weight: 760;
     }
 
+    :root[data-theme="dark"] .tree-row:hover {
+      background: #202d3f;
+    }
+
+    :root[data-theme="dark"] .tree-row.selected {
+      background: #123842;
+      border-color: #1c8c9d;
+      color: #dffcff;
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+
     .tree-row .label {
       min-width: 0;
       overflow: hidden;
@@ -467,6 +571,10 @@
       z-index: 2;
     }
 
+    :root[data-theme="dark"] .list-header {
+      background: #131c29;
+    }
+
     .item-row {
       display: grid;
       grid-template-columns: 34px minmax(120px, 1fr) minmax(120px, 0.8fr) 128px;
@@ -516,6 +624,29 @@
     .item-row:has(.item-actions button:last-child:focus-visible) {
       background: #e4f6f8;
       box-shadow: inset 3px 0 0 #72cdd6;
+    }
+
+    :root[data-theme="dark"] .item-row:hover,
+    :root[data-theme="dark"] .item-row.folder-row:hover,
+    :root[data-theme="dark"] .item-row:has(.item-actions button:last-child:hover),
+    :root[data-theme="dark"] .item-row:has(.item-actions button:last-child:focus-visible) {
+      background: #1f3444;
+      box-shadow: inset 3px 0 0 #1fa8b7;
+    }
+
+    :root[data-theme="dark"] .item-row.selected {
+      background: #123842;
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+
+    :root[data-theme="dark"] .item-row:hover .item-title,
+    :root[data-theme="dark"] .item-row.selected .item-title {
+      color: #ecfeff;
+    }
+
+    :root[data-theme="dark"] .item-row:hover .item-url,
+    :root[data-theme="dark"] .item-row.selected .item-url {
+      color: #9eeaf3;
     }
 
     .item-main {
@@ -611,6 +742,11 @@
       color: var(--accent-dark);
       background: #eaf8fa;
       flex: 0 0 auto;
+    }
+
+    :root[data-theme="dark"] .type-symbol {
+      border-color: #1c8c9d;
+      background: #123842;
     }
 
     .type-symbol svg {
@@ -821,6 +957,7 @@
           </button>
         </div>
         <button id="sampleBtn" type="button">Load sample</button>
+        <button id="themeBtn" class="icon theme-button" type="button" title="Switch to dark mode" aria-label="Switch to dark mode"></button>
         <button id="exportBtn" type="button" disabled>Export HTML</button>
       </div>
     </header>
@@ -989,6 +1126,7 @@
       helpDialog: document.getElementById('helpDialog'),
       closeHelpBtn: document.getElementById('closeHelpBtn'),
       sampleBtn: document.getElementById('sampleBtn'),
+      themeBtn: document.getElementById('themeBtn'),
       exportBtn: document.getElementById('exportBtn'),
       searchInput: document.getElementById('searchInput'),
       addFolderBtn: document.getElementById('addFolderBtn'),
@@ -1016,8 +1154,34 @@
       link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"></path><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1"></path></svg>',
       edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m14 6 4 4"></path><path d="M4 20h4l10.5-10.5a2.8 2.8 0 0 0-4-4L4 16v4Z"></path></svg>',
       up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m18 15-6-6-6 6"></path></svg>',
-      down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"></path></svg>'
+      down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m6 9 6 6 6-6"></path></svg>',
+      moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3a6.7 6.7 0 0 0 8.9 8.9 8 8 0 1 1-8.9-8.9Z"></path></svg>',
+      sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>'
     };
+
+    function currentTheme() {
+      return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme) {
+      const nextTheme = theme === 'dark' ? 'dark' : 'light';
+      if (nextTheme === 'dark') {
+        document.documentElement.dataset.theme = 'dark';
+      } else {
+        delete document.documentElement.dataset.theme;
+      }
+      els.themeBtn.innerHTML = nextTheme === 'dark' ? icons.sun : icons.moon;
+      const label = nextTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+      els.themeBtn.title = label;
+      els.themeBtn.setAttribute('aria-label', label);
+      try {
+        localStorage.setItem('bookmarkEditorTheme', nextTheme);
+      } catch (error) {
+        // Theme persistence is optional; the visible toggle still works.
+      }
+    }
+
+    applyTheme(currentTheme());
 
     function createNode(type, title, data = {}) {
       return {
@@ -1561,6 +1725,9 @@ ${node.children.map((child) => serializeNode(child, depth + 1)).join('')}${inden
       }
     });
     els.sampleBtn.addEventListener('click', loadSample);
+    els.themeBtn.addEventListener('click', () => {
+      applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+    });
     els.exportBtn.addEventListener('click', exportBookmarks);
     els.searchInput.addEventListener('input', render);
     els.addFolderBtn.addEventListener('click', () => addNode('folder'));
