@@ -24,37 +24,46 @@ Single-file HTML app for editing browser bookmark export files.
 5. Click **Export HTML**.
 6. Import the new file back into your browser.
 
-## Company Onboarding Use Case
+## Project Management Onboarding Use Case
 
-Companies can use this to prepare a clean bookmark file for new joiners.
+Project managers and team leads can use this to prepare a clean bookmark file for new joiners.
+
+The goal is to give people one organized import with the tools they need on day one: CRM, project boards, design files, docs, reports, and internal processes.
 
 Example:
 
 ```text
-New Joiner Bookmarks
+Project Team Bookmarks
 +-- Start Here
-|   +-- Employee handbook
-|   +-- IT setup guide
-|   +-- Company directory
-+-- Daily Tools
-|   +-- Email
-|   +-- Calendar
-|   +-- Chat
-|   +-- Ticket system
-+-- Engineering
-|   +-- GitHub
-|   +-- Docs
-|   +-- CI dashboard
-+-- HR & Admin
-    +-- Payroll
-    +-- Benefits
-    +-- Time off
+|   +-- Team handbook
+|   +-- Project overview
+|   +-- Onboarding checklist
++-- CRM & Sales
+|   +-- Salesforce / HubSpot
+|   +-- Customer accounts
+|   +-- Pipeline dashboard
++-- Project Delivery
+|   +-- Jira / Linear / Asana
+|   +-- Sprint board
+|   +-- Roadmap
++-- Design & Product
+|   +-- Figma
+|   +-- Product specs
+|   +-- Design system
++-- Docs & Knowledge
+|   +-- Notion / Confluence
+|   +-- Meeting notes
+|   +-- Process docs
++-- Reporting
+    +-- BI dashboard
+    +-- OKRs
+    +-- Status reports
 ```
 
 Workflow:
 
 ```text
-Curate URLs -> Organize folders -> Export HTML -> Share with new joiners -> Import into browser
+Curate team URLs -> Organize by workflow -> Export HTML -> Share with new joiners -> Import into browser
 ```
 
 ## Browser Support
